@@ -61,8 +61,6 @@ event KnowledgeAdded(bytes32 teaHash, uint256 normalizedScore);
   - interfaces/ITeaExpert.sol: Интерфейс для NFT-дипломов
 - Тесты: test/
   - knowledge.t.sol: Тесты на устойчивость к цензуре
-  - expert.t.sol: Тесты на верификацию
 - Документация: docs/
   - ARCHITECTURE.md: Почему блокчейн здесь уместен (и где — нет)
   - LESSONS.md: Уроки, которые я вынес
-  - USE_CASES.md: Где блокчейн НЕ решает проблему
