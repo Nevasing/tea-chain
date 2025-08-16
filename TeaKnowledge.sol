@@ -12,6 +12,12 @@ pragma solidity ^0.8.0;
  * Для физических объектов он создаёт больше проблем, чем решает.
  */
 contract TeaKnowledge {
+    // Константы для читаемости и избежания магических чисел
+    uint256 constant QUALITY_WEIGHT = 3;
+    uint256 constant UNIQUENESS_WEIGHT = 2;
+    uint256 constant DEMAND_WEIGHT = 1;
+    uint256 constant MAX_RAW_SCORE = (20 * QUALITY_WEIGHT) + (20 * UNIQUENESS_WEIGHT) + (15 * DEMAND_WEIGHT); // = 115
+
     struct QUD {
         uint8 quality;      // 0-20 (вкус + аромат + чи + проливы)
         uint8 uniqueness;   // 0-20 (регион + обработка + партия + история)
@@ -79,7 +85,7 @@ contract TeaKnowledge {
         return _calculateNormalizedScore(teaHash);
     }
 
-    /**
+     /**
      * @dev Проверка статуса эксперта
      * В реальном проекте здесь была бы интеграция с TeaExpert.sol
      */
@@ -87,11 +93,16 @@ contract TeaKnowledge {
         // В закрытом проекте эксперты не верифицируются
         return false;
     }
-
     /**
-     * @dev Расчёт нормализованного балла
-     * Формула: (сырой балл × 100) / 115
-     */
+    * @dev Расчёт нормализованного балла (0-100)
+    * Формула: (totalRawScore * 100) / (MAX_RAW_SCORE * totalWeight)
+    * Где:
+    *   - totalRawScore = сумма (сырой балл * вес голоса) [вес: обычный=1, эксперт=2]
+    *   - MAX_RAW_SCORE = 115 (максимум для одного голоса: 20*3 + 20*2 + 15*1)
+    *   - totalWeight = сумма весов голосов
+    * Пример: 
+    *   1 экспертный голос (вес=2) с rawScore=115 → (115*2 * 100) / (115 * 2) = 100
+    */
     function _calculateNormalizedScore(bytes32 teaHash) internal view returns (uint256) {
         QUD[] memory teaVotes = knowledgeBase[teaHash];
         if (teaVotes.length == 0) return 0;
@@ -103,14 +114,14 @@ contract TeaKnowledge {
             QUD memory v = teaVotes[i];
             uint256 weight = v.isExpert ? 2 : 1;
             uint256 rawScore = 
-                (v.quality * 3) + 
-                (v.uniqueness * 2) + 
-                (v.demand * 1);
+                (v.quality * QUALITY_WEIGHT) + 
+                (v.uniqueness * UNIQUENESS_WEIGHT) + 
+                (v.demand * DEMAND_WEIGHT);
 
             totalRawScore += rawScore * weight;
             totalWeight += weight;
         }
 
-        return (totalRawScore * 100) / (115 * totalWeight);
-    }
+        // Нормализация: (totalRawScore * 100) / (MAX_RAW_SCORE * totalWeight)
+        return (totalRawScore * 100) / (MAX_RAW_SCORE * totalWeight);
 }
