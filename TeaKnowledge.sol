@@ -101,7 +101,7 @@ contract TeaKnowledge {
     *   - MAX_RAW_SCORE = 115 (максимум для одного голоса: 20*3 + 20*2 + 15*1)
     *   - totalWeight = сумма весов голосов
     * Пример: 
-    *   1 экспертный голос (вес=2) с rawScore=115 → (115*2 * 100) / (115 * 2) = 100
+    *   1 экспертный голос (вес=2) с rawScore=115 - (115*2 * 100) / (115 * 2) = 100
     */
     function _calculateNormalizedScore(bytes32 teaHash) internal view returns (uint256) {
         QUD[] memory teaVotes = knowledgeBase[teaHash];
